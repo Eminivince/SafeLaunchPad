@@ -14,6 +14,9 @@ import { isAddress } from "../../../../utils/utils";
 import { useIPFS } from "../../../../hooks/useIPFS";
 import { ETHER } from "../../../../constants";
 
+import streamifier from "streamifier";
+import { Buffer } from "buffer";
+
 export default function Preview() {
   const { account, chainId, library } = useWeb3React();
   const {
@@ -54,6 +57,25 @@ export default function Preview() {
 
   const ipfs = useIPFS();
 
+  // Convert a File/Blob to a Node Readable stream
+  const fileToStream = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const arrayBuffer = reader.result;
+        // Create a Buffer from the ArrayBuffer
+        const buffer = Buffer.from(arrayBuffer);
+        // Use streamifier to create a stream from the Buffer
+        const stream = streamifier.createReadStream(buffer);
+        resolve(stream);
+      };
+      reader.onerror = (err) => {
+        reject(err);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   const tokenContract = useTokenContract(tokenAddress);
   const [IDOFactoryFee, sesIDOFactoryFee] = useState("0");
   const [tokenApprove, setTokenApprove] = useState("");
@@ -65,25 +87,35 @@ export default function Preview() {
   const listingRateBN = BigNumber(isAddLiquidityEnabled ? listingRate : 0);
   const lp = BigNumber(isAddLiquidityEnabled ? liquidityPercentage : 0);
 
-  const oneTokenInWei = ETHER.div(tokenRateBN).integerValue(BigNumber.ROUND_CEIL);
-  const oneListingTokeninWei = ETHER.div(listingRateBN).integerValue(BigNumber.ROUND_CEIL);
+  const oneTokenInWei = ETHER.div(tokenRateBN).integerValue(
+    BigNumber.ROUND_CEIL
+  );
+  const oneListingTokeninWei = ETHER.div(listingRateBN).integerValue(
+    BigNumber.ROUND_CEIL
+  );
 
-  const requiredToken = ETHER.times(hardCapBN).div(oneTokenInWei)
-    .plus(ETHER.times(hardCapBN).div(oneListingTokeninWei).times(lp).dividedBy(100))
+  const requiredToken = ETHER.times(hardCapBN)
+    .div(oneTokenInWei)
+    .plus(
+      ETHER.times(hardCapBN).div(oneListingTokeninWei).times(lp).dividedBy(100)
+    )
     .times(tokenInfo.tokenDenominator);
 
   useEffect(() => {
     const checkTokenApproval = async () => {
       setIsTokenApprovalFetching(true);
       try {
-        let tokenApproval = await tokenContract.allowance(account, IDOFactoryAddress);
+        let tokenApproval = await tokenContract.allowance(
+          account,
+          IDOFactoryAddress
+        );
         setTokenApprove(tokenApproval);
       } catch (error) {
-        console.log('checkTokenApproval error: ', error);
+        console.log("checkTokenApproval error: ", error);
       } finally {
         setIsTokenApprovalFetching(false);
       }
-    }
+    };
     if (isAddress(tokenAddress) && tokenContract) {
       checkTokenApproval();
     } else {
@@ -93,49 +125,55 @@ export default function Preview() {
 
   useEffect(() => {
     const fetchIDOFactoryFee = async () => {
-      const IDOFactoryFee = await IDOFactoryContract?.feeAmount() || "0";
+      const IDOFactoryFee = (await IDOFactoryContract?.feeAmount()) || "0";
       sesIDOFactoryFee(IDOFactoryFee.toString());
-    }
+    };
 
     fetchIDOFactoryFee();
   }, [IDOFactoryContract]);
 
   const pinJSONToIPFS = async (JSONBody) => {
     try {
-      const JSONBodyString = JSON.stringify(JSONBody);
-      const response = await ipfs.add(JSONBodyString);
+      const response = await ipfs.pinJSONToIPFS(JSONBody);
+      console.log("pinned JSON");
       return {
         success: true,
-        ipfsHash:
-          response.path,
+        ipfsHash: response.IpfsHash,
       };
-
     } catch (error) {
-
       console.log(error);
       return {
         success: false,
         message: error.message,
       };
-
     }
   };
 
   const createIDO = async () => {
     setLoading(true);
 
+    const options = {
+      pinataMetadata: {
+        name: "default-filename.jpg", // use the file's name or a default value
+      },
+    };
+
     try {
-      const iconAdded = await ipfs.add(icon);
+      const iconStream = await fileToStream(icon);
+
+      // const iconAdded = await ipfs.pinFileToIPFS(iconStream, options);
+
+
 
       const metadata = {
-        imageHash: iconAdded.path,
+        imageHash: "9hshsgahah",
         description,
         links: {
           website,
           discord,
           telegram,
           twitter,
-        }
+        },
       };
 
       const ipfsResonse = await pinJSONToIPFS(metadata);
@@ -159,10 +197,21 @@ export default function Preview() {
         listingRateBN.gt(0) ? `0x${oneListingTokeninWei.toString(16)}` : 0,
         parseInt(isAddLiquidityEnabled ? liquidityPercentage : 0),
       ];
+
+      console.log(start, "start");
       const timestamps = [
-        `0x${BigNumber(start.getTime()).div(1000).decimalPlaces(0, 1).toString(16)}`,
-        `0x${BigNumber(end.getTime()).div(1000).decimalPlaces(0, 1).toString(16)}`,
-        `0x${BigNumber(unlock.getTime()).div(1000).decimalPlaces(0, 1).toString(16)}`,
+        `0x${BigNumber(start.getTime())
+          .div(1000)
+          .decimalPlaces(0, 1)
+          .toString(16)}`,
+        `0x${BigNumber(end.getTime())
+          .div(1000)
+          .decimalPlaces(0, 1)
+          .toString(16)}`,
+        `0x${BigNumber(unlock.getTime())
+          .div(1000)
+          .decimalPlaces(0, 1)
+          .toString(16)}`,
       ];
       const dexInfo = [
         chainRouter[chainId][0].ROUTER,
@@ -170,27 +219,31 @@ export default function Preview() {
         chainRouter[chainId][0].WETH,
       ];
 
-      const tx = await IDOFactoryContract
-        .createIDO(
-          rewardToken,
-          finInfo,
-          timestamps,
-          dexInfo,
-          TokenLockerFactoryAddress,
-          tokenURI,
-          {
-            from: account,
-          },
-        );
+      const tx = await IDOFactoryContract.createIDO(
+        rewardToken,
+        finInfo,
+        timestamps,
+        dexInfo,
+        TokenLockerFactoryAddress,
+        tokenURI,
+        {
+          from: account,
+          gasLimit: 3000000, // Set your desired gas limit here
+        }
+      );
 
       const receipt = await tx.wait();
 
-      console.log('createIDO receipt', receipt);
+      console.log("createIDO receipt", receipt);
 
       triggerUpdateAccountData();
-      const IDOCreatedIndex = receipt?.events?.findIndex?.((i) => i?.event === "IDOCreated");
-      if (IDOCreatedIndex || IDOCreatedIndex === 0){
-        navigate(`../launchpad/${receipt.events[IDOCreatedIndex].args.idoPool}`)
+      const IDOCreatedIndex = receipt?.events?.findIndex?.(
+        (i) => i?.event === "IDOCreated"
+      );
+      if (IDOCreatedIndex || IDOCreatedIndex === 0) {
+        navigate(
+          `../launchpad/${receipt.events[IDOCreatedIndex].args.idoPool}`
+        );
       }
     } catch (error) {
       console.log("createIDO Error: ", error);
@@ -235,8 +288,7 @@ export default function Preview() {
             backgroundColor: "var(--upper-card)",
             alignItems: "center",
             justifyContent: "center",
-          }}
-        >
+          }}>
           <s.iconUpload
             type="file"
             accept="image/png, image/jpeg"
@@ -244,8 +296,7 @@ export default function Preview() {
               e.preventDefault();
               const file = e.target.files[0];
               setIcon(file);
-            }}
-          ></s.iconUpload>
+            }}></s.iconUpload>
           {icon !== "" ? (
             <img
               style={{ width: 100, height: 100, borderRadius: 20 }}
@@ -294,16 +345,12 @@ export default function Preview() {
         <s.Container flex={1} style={{ marginLeft: 10, marginRight: 10 }}>
           <s.TextID>Soft Cap</s.TextID>
           <s.TextDescription>
-            {BigNumber(softCap).toFormat(2) +
-              " $" +
-              baseCurrencySymbol}
+            {BigNumber(softCap).toFormat(2) + " $" + baseCurrencySymbol}
           </s.TextDescription>
           <s.SpacerSmall />
           <s.TextID>Hard Cap</s.TextID>
           <s.TextDescription>
-            {hardCapBN.toFormat(2) +
-              " $" +
-              baseCurrencySymbol}
+            {hardCapBN.toFormat(2) + " $" + baseCurrencySymbol}
           </s.TextDescription>
           <s.SpacerSmall />
           {/* <s.TextID>Pool router</s.TextID>
@@ -317,30 +364,26 @@ export default function Preview() {
         <s.Container flex={1} style={{ marginLeft: 10, marginRight: 10 }}>
           <s.TextID>Minimum Buy</s.TextID>
           <s.TextDescription>
-            {BigNumber(minETH).toFormat(2) +
-              " $" +
-              baseCurrencySymbol}
+            {BigNumber(minETH).toFormat(2) + " $" + baseCurrencySymbol}
           </s.TextDescription>
           <s.SpacerSmall />
           <s.TextID>Maximum Buy</s.TextID>
           <s.TextDescription>
-            {BigNumber(maxETH).toFormat(2) +
-              " $" +
-              baseCurrencySymbol}
+            {BigNumber(maxETH).toFormat(2) + " $" + baseCurrencySymbol}
           </s.TextDescription>
-          {
-            isAddLiquidityEnabled && <>
+          {isAddLiquidityEnabled && (
+            <>
               <s.SpacerSmall />
               <s.TextID>Liquidity %</s.TextID>
               <s.TextDescription>
                 {BigNumber(liquidityPercentage).toFixed(0) + " %"}
               </s.TextDescription>
             </>
-          }
+          )}
         </s.Container>
       </s.Container>
-      {
-        isAddLiquidityEnabled && <>
+      {isAddLiquidityEnabled && (
+        <>
           <s.TextID>Listing rate</s.TextID>
           <s.TextDescription>
             {"1 $" +
@@ -352,36 +395,36 @@ export default function Preview() {
           </s.TextDescription>
           (TokenRate * HardCap) + ((HardCap * LP%) * ListingRate)
         </>
-      }
+      )}
       <s.TextDescription fullWidth style={{ color: "var(--primary)" }}>
         {"Required " +
-          requiredToken
-            .dividedBy(tokenInfo.tokenDenominator)
-            .toFormat() +
+          requiredToken.dividedBy(tokenInfo.tokenDenominator).toFormat() +
           " $" +
           tokenInfo.tokenSymbol}
       </s.TextDescription>
       <s.Container ai="center">
-        {BigNumber(FeeTokenApproveToFactory?.toString?.()).lt(BigNumber(IDOFactoryFee?.toString?.())) ? (
+        {BigNumber(FeeTokenApproveToFactory?.toString?.()).lt(
+          BigNumber(IDOFactoryFee?.toString?.())
+        ) ? (
           <s.button
             style={{ marginTop: 20 }}
             disabled={loading}
             onClick={(e) => {
               e.preventDefault();
               approveToken(IDOFactoryFee, FeeTokenContract);
-            }}
-          >
+            }}>
             {loading ? ". . ." : `APPROVE ${FeeTokenSymbol}`}
           </s.button>
-        ) : BigNumber(tokenApprove?.toString?.()).lt(BigNumber(requiredToken?.toString?.())) ? (
+        ) : BigNumber(tokenApprove?.toString?.()).lt(
+            BigNumber(requiredToken?.toString?.())
+          ) ? (
           <s.button
             style={{ marginTop: 20 }}
             disabled={loading}
             onClick={(e) => {
               e.preventDefault();
               approveToken(BigNumber(requiredToken).toFixed(0), tokenContract);
-            }}
-          >
+            }}>
             {loading ? ". . ." : `APPROVE ${tokenInfo.tokenSymbol}`}
           </s.button>
         ) : (
@@ -391,14 +434,17 @@ export default function Preview() {
             onClick={(e) => {
               e.preventDefault();
               createIDO();
-            }}
-          >
+            }}>
             {loading ? ". . ." : "Create IDO Poll"}
           </s.button>
         )}
       </s.Container>
 
-      {IDOFactoryFee && IDOFactoryFee !== "0" && `Create IDO fee : ${library.web3.utils.fromWei(IDOFactoryFee)} ${FeeTokenSymbol}`}
+      {IDOFactoryFee &&
+        IDOFactoryFee !== "0" &&
+        `Create IDO fee : ${library.web3.utils.fromWei(
+          IDOFactoryFee
+        )} ${FeeTokenSymbol}`}
     </s.Container>
   );
 }

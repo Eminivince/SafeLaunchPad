@@ -17,7 +17,6 @@ const IDOList = (props) => {
   const { owner, tokenAddress } = props;
 
   useEffect(() => {
-    console.log("allPools", allPools);
   }, [allPools]);
 
   const loadmore = (amount) => {

@@ -91,9 +91,11 @@ export default function IPFS() {
     try {
       const newSettings = {
         ipfsInfuraDedicatedGateway,
-        ipfsInfuraProjectId,
-        ipfsInfuraProjectSecret,
+        ipfsInfuraProjectId, // Will treat this as pinataApiKey
+        ipfsInfuraProjectSecret, // Will treat this as pinataSecretKey
       };
+
+      
 
       await saveAppData({
         library,

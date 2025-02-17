@@ -1,7 +1,7 @@
 export const networks = {
   1: {
     name: "Ethereum",
-    rpc: 'https://rpc.ankr.com/eth',
+    rpc: "https://rpc.ankr.com/eth",
     chainId: 1,
     explorer: "https://etherscan.io",
     color: "#627EEA",
@@ -11,13 +11,34 @@ export const networks = {
     baseCurrency: {
       decimals: 18,
       name: "ETH",
-      symbol: "ETH"
+      symbol: "ETH",
     },
     wrappedToken: {
       address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       name: "Wrapped Etherer",
-      symbol: "WETH"
-    }
+      symbol: "WETH",
+    },
+  },
+  16718: {
+    name: "AirDAO Mainnet",
+    rpc: "https://network.ambrosus.io",
+    chainId: 16718,
+    explorer: "https://airdao/explorer",
+    color: "#627EEA",
+    storage: "0x5cd6E6bE8C87dA29A5DC98A7E8796f35Cf404Bc2",
+    multicall: "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
+    ENSRegistry: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+    fromBlock: 34957780,
+    baseCurrency: {
+      decimals: 18,
+      name: "AMB",
+      symbol: "AMB",
+    },
+    wrappedToken: {
+      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      name: "sAMB",
+      symbol: "SAMB",
+    },
   },
   5: {
     name: "Görli",
@@ -32,13 +53,13 @@ export const networks = {
     baseCurrency: {
       decimals: 18,
       name: "ETH",
-      symbol: "ETH"
+      symbol: "ETH",
     },
     wrappedToken: {
       address: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
       name: "Wrapped Ether",
-      symbol: "WETH"
-    }
+      symbol: "WETH",
+    },
   },
   56: {
     name: "BSC",
@@ -52,13 +73,13 @@ export const networks = {
     baseCurrency: {
       decimals: 18,
       name: "BNB",
-      symbol: "BNB"
+      symbol: "BNB",
     },
     wrappedToken: {
       address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       name: "Wrapped BNB",
-      symbol: "WBNB"
-    }
+      symbol: "WBNB",
+    },
   },
   97: {
     name: "BSC Testnet",
@@ -71,15 +92,15 @@ export const networks = {
     baseCurrency: {
       decimals: 18,
       name: "BNB",
-      symbol: "BNB"
+      symbol: "BNB",
     },
     wrappedToken: {
       address: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
       name: "Wrapped BNB",
-      symbol: "WBNB"
-    }
+      symbol: "WBNB",
+    },
   },
-}
+};
 
 export const chainRouter = {
   1: [
@@ -96,6 +117,14 @@ export const chainRouter = {
       FACTORY: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
       WETH: "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
       ROUTER: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    },
+  ],
+  16718: [
+    {
+      name: "Astra",
+      FACTORY: "0x2b6852CeDEF193ece9814Ee99BE4A4Df7F463557",
+      WETH: "0x2b2d892C3fe2b4113dd7aC0D2c1882AF202FB28F",
+      ROUTER: "0xf7237C595425b49Eaeb3Dc930644de6DCa09c3C4",
     },
   ],
   56: [
@@ -116,8 +145,7 @@ export const chainRouter = {
   ],
 };
 
-
 export default {
   chainRouter,
   networks,
-}
+};

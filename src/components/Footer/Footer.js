@@ -44,7 +44,7 @@ const Footer = () => {
     <>
       Powered by{' '}
       <a href="https://onout.org/launchpad" target="_blank" rel="noopener noreferrer">
-        OnOut - no-code tool for creating Launchpad
+        SafeLaunch
       </a>
     </>
   );
@@ -59,7 +59,7 @@ const Footer = () => {
           borderColor: "#ffffff",
         }}
       />
-      <Container style={{ padding: 30 }}>
+      <Container style={{ padding: 3 }}>
         <Row fd="column" ai="center">
           <Heading>Contract Addresses</Heading>
           <FooterLink

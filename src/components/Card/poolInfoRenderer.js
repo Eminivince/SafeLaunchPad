@@ -24,7 +24,7 @@ const PoolInfoRenderer = (props) => {
   let idoInfo = poolContext.allPools[idoAddress];
 
   if (!utils.isValidPool(idoInfo)) {
-    console.log(idoInfo);
+
     return null;
   }
 

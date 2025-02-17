@@ -1,9 +1,11 @@
-import ETH from './eth.png'
-import BNB from './bnb.png'
+import ETH from "./eth.png";
+import BNB from "./bnb.png";
+import AIRDAO from "./AirDAOLogo.jpeg";
 
 export const CURRENCY = {
   ETH,
   BNB,
+  AIRDAO,
 
   // ------------
 
@@ -14,4 +16,5 @@ export const CURRENCY = {
   42: ETH,
   56: BNB,
   97: BNB,
-}
+  16718: AIRDAO,
+};

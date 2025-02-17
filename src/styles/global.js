@@ -214,7 +214,7 @@ export const Text = styled.div`
 `;
 
 export const TextTitle = styled.p`
-  color: var(--text);
+
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "none")};
   text-align: center;
   line-height: 1;

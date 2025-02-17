@@ -12,7 +12,9 @@ const Account = () => {
   const { account } = useWeb3React();
   const [showZero, setShowZero] = useState(0);
 
-  const { domainSettings: { isLockerEnabled } } = useApplicationContext();
+  const {
+    domainSettings: { isLockerEnabled },
+  } = useApplicationContext();
 
   if (!account) {
     return (
@@ -42,25 +44,25 @@ const Account = () => {
           <LongIdoList />
         </s.Container>
 
-        {
-          isLockerEnabled &&
+        {isLockerEnabled && (
           <s.Container flex={1}>
             <s.Container fd="row" ai="center" jc="space-between">
-              <s.TextTitle style={{ flex: 1, whiteSpace: "nowrap", margin: 20 }}>
+              <s.TextTitle
+                style={{ flex: 1, whiteSpace: "nowrap", margin: 20 }}>
                 My Locker
               </s.TextTitle>
               <CreateLocker />
             </s.Container>
             <s.Container fd="row" flex={1}>
               <s.Container flex={4}></s.Container>
-              <s.Container flex={2} ai="center" fd="row" jc="center">
+              {/* <s.Container flex={2} ai="center" fd="row" jc="center">
                 <s.TextDescription>show zero?</s.TextDescription>
                 <Checkbox value={showZero} onChange={handleShowZero} />
-              </s.Container>
+              </s.Container> */}
             </s.Container>
             <LockerList showZero={showZero} showUserLockers />
           </s.Container>
-        }
+        )}
       </s.Container>
     </s.Container>
   );

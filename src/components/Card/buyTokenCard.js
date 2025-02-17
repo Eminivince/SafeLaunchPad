@@ -50,9 +50,9 @@ const BuyTokenCard = (props) => {
 
       triggerUpdateAccountData();
       // TODO: add trigger for update IDOInfo after actions
-      console.log("buyToken receipt", receipt);
+
     } catch (err) {
-      console.log("buyToken Error: ", err);
+
     } finally {
       setLoading(false);
     }

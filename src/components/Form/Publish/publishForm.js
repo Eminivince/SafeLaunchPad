@@ -39,7 +39,6 @@ export default function StepsForm() {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     if (activeStep === 0) {
       if (!context.tokenFormValidate()) {
         return false;

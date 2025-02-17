@@ -24,10 +24,10 @@ const Locker = (props) => {
       <s.SpacerMedium />
       <s.Container fd="row">
         <s.Container flex={7}></s.Container>
-        <s.Container flex={2} ai="center" fd="row" jc="center">
+        {/* <s.Container flex={2} ai="center" fd="row" jc="center">
           show zero?
           <Checkbox value={showZero} onChange={handleShowZero} />
-        </s.Container>
+        </s.Container> */}
       </s.Container>
       <TextField
         fullWidth

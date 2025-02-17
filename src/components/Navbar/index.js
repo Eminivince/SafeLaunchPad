@@ -11,6 +11,7 @@ import Loader from "../Loader";
 import { useWeb3React } from "@web3-react/core";
 import { CURRENCY } from '../../assets/images';
 import { Paper } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const NetworkCard = styled(Paper)`
   display: flex;
@@ -77,9 +78,16 @@ const Navigation = () => {
   }
 
   return (
-    <Navbar collapseOnSelect expand="lg" variant="dark" style={{ margin: 15 }}>
+    <Navbar
+      collapseOnSelect
+      expand="lg"
+      variant="dark"
+      style={{ padding: 15, backgroundColor: "#000" }}>
       <Container style={{ maxWidth: "100%" }}>
-        <s.LogoTitle src={logoUrl || mockCompanyLogo} />
+        <Link to="/home" style={{ maxWidth: "100%", marginRight: "200px", textDecoration: "none", fontSize: "25px", color: "#fff" }}>
+          SafeLaunch
+        </Link>
+
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
@@ -89,67 +97,63 @@ const Navigation = () => {
             <LinkContainer to="/launchpad">
               <Nav.Link>Launchpad</Nav.Link>
             </LinkContainer>
-            {
-              isLockerEnabled &&
+            {isLockerEnabled && (
               <LinkContainer to="/locker">
                 <Nav.Link>Locker</Nav.Link>
               </LinkContainer>
-            }
+            )}
             <LinkContainer to="/account">
               <Nav.Link>Account</Nav.Link>
             </LinkContainer>
-            {
-              isAdmin &&
+            {isAdmin && (
               <LinkContainer to="/manage">
                 <Nav.Link>Manage</Nav.Link>
               </LinkContainer>
-            }
+            )}
           </Nav>
           <Nav>
             <Nav.Link>{getNetworkInfo()}</Nav.Link>
 
-            {
-              !hasFeeToken ? (
-                <Nav.Link>
-                  {
-                    isNativeCoinBalanceFetching ?
-                      <Loader/> :
-                      `$${baseCurrencySymbol} ` +
-                        BigNumber(ETHamount)
-                          .dividedBy(10 ** 18)
-                          .toFormat(2)
-                  }
+            {!hasFeeToken ? (
+              <Nav.Link>
+                {isNativeCoinBalanceFetching ? (
+                  <Loader />
+                ) : (
+                  `$${baseCurrencySymbol} ` +
+                  BigNumber(ETHamount)
+                    .dividedBy(10 ** 18)
+                    .toFormat(2)
+                )}
+              </Nav.Link>
+            ) : (
+              <NavDropdown
+                title={
+                  isNativeCoinBalanceFetching ? (
+                    <Loader />
+                  ) : (
+                    `$${baseCurrencySymbol} ` +
+                    BigNumber(ETHamount)
+                      .dividedBy(10 ** 18)
+                      .toFormat(2)
+                  )
+                }
+                id="collasible-nav-dropdown">
+                <Nav.Link
+                  href={`${networkExplorer}/address/${FeeTokenAddress}`}
+                  target="_blank">
+                  {isFeeTokenDataFetching ? (
+                    <Loader />
+                  ) : (
+                    `$${FeeTokenSymbol} ` +
+                    BigNumber(FeeTokenamount)
+                      .dividedBy(10 ** 18)
+                      .toFormat(0)
+                  )}
                 </Nav.Link>
-              ) : (
-                <NavDropdown
-                  title={
-                    isNativeCoinBalanceFetching ?
-                      <Loader/> :
-                      `$${baseCurrencySymbol} ` +
-                        BigNumber(ETHamount)
-                          .dividedBy(10 ** 18)
-                          .toFormat(2)
-                  }
-                  id="collasible-nav-dropdown"
-                >
-                  <Nav.Link
-                    href={`${networkExplorer}/address/${FeeTokenAddress}`}
-                    target="_blank"
-                  >
-                    {
-                      isFeeTokenDataFetching ?
-                        <Loader /> :
-                        `$${FeeTokenSymbol} ` +
-                          BigNumber(FeeTokenamount)
-                            .dividedBy(10 ** 18)
-                            .toFormat(0)
-                    }
-                  </Nav.Link>
-                  {/* <NavDropdown.Item href="#action/3.3"></NavDropdown.Item> */}
-                  <NavDropdown.Divider />
-                </NavDropdown>
-              )
-            }
+                {/* <NavDropdown.Item href="#action/3.3"></NavDropdown.Item> */}
+                <NavDropdown.Divider />
+              </NavDropdown>
+            )}
           </Nav>
           <Web3Status />
         </Navbar.Collapse>

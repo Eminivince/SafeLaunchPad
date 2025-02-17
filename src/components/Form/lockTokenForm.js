@@ -1,7 +1,7 @@
 import { withStyles } from "@material-ui/core/styles";
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { TextField, InputAdornment} from "@mui/material";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { TextField, InputAdornment } from "@mui/material";
 import BigNumber from "bignumber.js";
 import React, { useEffect, useState } from "react";
 import { Badge } from "react-bootstrap";
@@ -41,7 +41,7 @@ const LockTokenForm = () => {
   const [tokenLoading, setTokenLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const {account, library } = useWeb3React();
+  const { account, library } = useWeb3React();
 
   const tokenContract = useTokenContract(tokenAddress);
   const tokenContractForChecking = useTokenContract(tokenAddressForChecking);
@@ -73,35 +73,42 @@ const LockTokenForm = () => {
           setTokenName(await tokenContractForChecking?.name());
           setTotalSupply(Number(await tokenContractForChecking?.totalSupply()));
           setTokenSymbol(await tokenContractForChecking?.symbol());
-          setTokenApprove(Number(await tokenContractForChecking?.allowance(account, TokenLockerFactoryAddress)));
+          setTokenApprove(
+            Number(
+              await tokenContractForChecking?.allowance(
+                account,
+                TokenLockerFactoryAddress
+              )
+            )
+          );
 
           setTokenAddress(tokenAddressForChecking);
           setDistributed();
         } else {
           setDecimals(-1);
           await utils.timeout(100);
-      }
+        }
       } catch (error) {
-        console.log('checkAndSetTokensDetails Error: ', error);
+        console.log("checkAndSetTokensDetails Error: ", error);
         setDecimals(-1);
       } finally {
-        setTokenLoading(false)
+        setTokenLoading(false);
       }
     };
 
     if (utils.isAddress(tokenAddressForChecking)) {
-      checkAndSetTokensDetails()
+      checkAndSetTokensDetails();
     } else {
       setTokenAddress("");
       setTokenName("");
       setTotalSupply("");
       setTokenSymbol("");
       setTokenApprove("0");
-      if(tokenAddressForChecking !== "") {
+      if (tokenAddressForChecking !== "") {
         // TODO: show user Error address is not correct
       }
     }
-  }, [tokenContractForChecking])
+  }, [tokenContractForChecking]);
 
   useEffect(() => {
     const fethcLockerFee = async () => {
@@ -111,7 +118,7 @@ const LockTokenForm = () => {
       } else {
         setFee("0");
       }
-    }
+    };
     fethcLockerFee();
   }, [TokenLockerFactoryContract]);
 
@@ -136,9 +143,13 @@ const LockTokenForm = () => {
     setLoading(true);
 
     try {
-      const tx = await tokenContract.approve(TokenLockerFactoryAddress, amount, {
-        from: account,
-      });
+      const tx = await tokenContract.approve(
+        TokenLockerFactoryAddress,
+        amount,
+        {
+          from: account,
+        }
+      );
 
       await tx.wait();
 
@@ -163,14 +174,19 @@ const LockTokenForm = () => {
         {
           from: account,
           value: fee,
+          gasLimit: 3000000, // Set your desired gas limit here
         }
       );
 
       const receipt = await tx.wait();
       triggerUpdateAccountData();
-      const LockerCreatedIndex = receipt?.events?.findIndex?.((i) => i?.event === "LockerCreated");
-      if (LockerCreatedIndex || LockerCreatedIndex === 0){
-        navigate(`../locker/${receipt.events[LockerCreatedIndex].args.lockerAddress}`)
+      const LockerCreatedIndex = receipt?.events?.findIndex?.(
+        (i) => i?.event === "LockerCreated"
+      );
+      if (LockerCreatedIndex || LockerCreatedIndex === 0) {
+        navigate(
+          `../locker/${receipt.events[LockerCreatedIndex].args.lockerAddress}`
+        );
       }
     } catch (error) {
       console.log(error);
@@ -185,17 +201,16 @@ const LockTokenForm = () => {
       jc="space-evenly"
       style={{
         maxWidth: 1000,
-      }}
-    >
+      }}>
       <s.TextTitle>Lock token</s.TextTitle>
       <s.SpacerSmall />
       <s.Container style={{ marginBottom: 20 }}>
         {tokenLoading ? (
           <Badge bg="secondary">Token Address Checking...</Badge>
-        ) : (decimals > 0 &&
-        tokenName !== "" &&
-        tokenSymbol !== "" &&
-        totalSupply !== "") ? (
+        ) : decimals > 0 &&
+          tokenName !== "" &&
+          tokenSymbol !== "" &&
+          totalSupply !== "" ? (
           <s.Container fd="row" style={{ flexWrap: "wrap" }}>
             <Badge bg="success">{"Name: " + tokenName}</Badge>
             <s.SpacerXSmall />
@@ -210,10 +225,11 @@ const LockTokenForm = () => {
             <s.SpacerXSmall />
             <Badge bg="success">{"Symbol: " + tokenSymbol}</Badge>
           </s.Container>
-        ) :  (tokenAddress !== "" && (
-          <Badge bg="danger">{"Contract not valid"}</Badge>
-        ))
-        }
+        ) : (
+          tokenAddress !== "" && (
+            <Badge bg="danger">{"Contract not valid"}</Badge>
+          )
+        )}
       </s.Container>
       <TextField
         fullWidth
@@ -222,8 +238,7 @@ const LockTokenForm = () => {
         onChange={(e) => {
           e.preventDefault();
           setName(e.target.value);
-        }}
-      ></TextField>
+        }}></TextField>
       <s.SpacerSmall />
       <TextField
         fullWidth
@@ -232,15 +247,16 @@ const LockTokenForm = () => {
         onChange={(e) => {
           e.preventDefault();
           setTokenAddressForChecking(e.target.value);
-        }}
-      ></TextField>
+        }}></TextField>
       <s.SpacerSmall />
       <TextField
         fullWidth
         id="amount"
         label="Lock amount"
         InputProps={{
-          endAdornment: <InputAdornment position="end">{tokenSymbol || ''}</InputAdornment>,
+          endAdornment: (
+            <InputAdornment position="end">{tokenSymbol || ""}</InputAdornment>
+          ),
         }}
         onWheel={(e) => {
           e.target.blur();
@@ -298,24 +314,19 @@ const LockTokenForm = () => {
             onClick={(e) => {
               e.preventDefault();
               createLocker();
-            }}
-          >
+            }}>
             {loading ? <Loader /> : "LOCK"}
           </s.button>
         ) : (
           <s.button
             disabled={
-              loading ||
-              !tokenAddress ||
-              tokenDistributed <= 0 ||
-              decimals <= 0
+              loading || !tokenAddress || tokenDistributed <= 0 || decimals <= 0
             }
             style={{ marginTop: 20 }}
             onClick={(e) => {
               e.preventDefault();
               approveToken(tokenDistributed);
-            }}
-          >
+            }}>
             {loading ? <Loader /> : "APPROVE TOKEN"}
           </s.button>
         )}

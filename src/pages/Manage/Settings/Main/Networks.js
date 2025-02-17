@@ -80,7 +80,7 @@ export default function Networks() {
             triggerDomainData();
           },
         onHash: (hash) => {
-          console.log('saveNetworksData hash: ', hash);
+
         },
       })
     } catch (error) {
