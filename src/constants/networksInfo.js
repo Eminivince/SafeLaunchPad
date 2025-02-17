@@ -23,7 +23,7 @@ export const networks = {
     name: "AirDAO Mainnet",
     rpc: "https://network.ambrosus.io",
     chainId: 16718,
-    explorer: "https://airdao/explorer",
+    explorer: "https://airdao.io/explorer",
     color: "#627EEA",
     storage: "0x5cd6E6bE8C87dA29A5DC98A7E8796f35Cf404Bc2",
     multicall: "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
